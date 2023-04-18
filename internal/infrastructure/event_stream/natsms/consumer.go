@@ -92,7 +92,8 @@ func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) error {
 
 			if len(messages) != batchSize {
 				return fmt.Errorf(
-					"cannot unsubscribe from stream %q: %v",
+					"messages number is greater than %d from stream %q: %v",
+					batchSize,
 					c.streamName,
 					err,
 				)
