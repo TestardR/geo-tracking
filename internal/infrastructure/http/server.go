@@ -7,7 +7,7 @@ import (
 )
 
 func NewHttpServer(
-	// service
+	// handler
 	logger shared.ErrorInfoLogger,
 ) *http.Server {
 	return nil
