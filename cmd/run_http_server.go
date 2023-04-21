@@ -33,8 +33,8 @@ func RunAsHTTPServer(
 
 	_, err = natsms.NewConsumer(
 		cfg.NatsBrokerList,
-		natsms.GeoLocationStream,
-		natsms.GeoLocationStream,
+		natsms.DriverLocationUpdatedStream,
+		natsms.DriverLocationUpdatedStream,
 		zapSugaredLogger,
 	)
 	if err != nil {

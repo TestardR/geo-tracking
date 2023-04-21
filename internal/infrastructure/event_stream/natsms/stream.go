@@ -1,3 +1,3 @@
 package natsms
 
-const GeoLocationStream = "gt.model-model.stream.v1"
+const DriverLocationUpdatedStream = "gt.driver-coordinate-update.v1"
