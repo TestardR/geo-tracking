@@ -46,18 +46,22 @@ func NewConsumer(
 	}, nil
 }
 
-func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) error {
+func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) {
 	_, err := c.stream.AddStream(&nats.StreamConfig{
 		Name:     c.streamName,
 		Subjects: []string{c.subject},
 	})
 	if err != nil {
-		return err
+		c.logger.Error(fmt.Errorf("cannot add nats stream: %v", err))
+
+		return
 	}
 
 	sub, err := c.stream.PullSubscribe("", "", nats.BindStream(c.streamName))
 	if err != nil {
-		return err
+		c.logger.Error(fmt.Errorf("cannot subscribe to nats stream: %v", err))
+
+		return
 	}
 
 	for {
@@ -74,7 +78,7 @@ func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) error {
 				c.logger.Error(err)
 			}
 
-			return nil
+			return
 		default:
 			messages, err := sub.Fetch(batchSize, nats.MaxWait(time.Second))
 			if err != nil {
@@ -91,12 +95,16 @@ func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) error {
 			}
 
 			if len(messages) != batchSize {
-				return fmt.Errorf(
+				err := fmt.Errorf(
 					"messages number is greater than %d from stream %q: %v",
 					batchSize,
 					c.streamName,
 					err,
 				)
+
+				c.logger.Error(err)
+
+				return
 			}
 
 			msg := messages[0]
@@ -126,4 +134,8 @@ func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) error {
 			continue
 		}
 	}
+}
+
+func (c *Consumer) Stop() {
+	c.stop <- struct{}{}
 }

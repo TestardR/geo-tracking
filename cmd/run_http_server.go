@@ -1,12 +1,20 @@
 package cmd
 
 import (
+	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/urfave/cli/v2"
 
 	"github.com/TestardR/geo-tracking/config"
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
 	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
+	coordinateWorker "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate_worker"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http-status-v1"
 	logger "github.com/TestardR/geo-tracking/internal/infrastructure/logging/zap_logger"
@@ -21,6 +29,9 @@ func RunAsHTTPServer(
 	consoleOutput shared.StdLogger,
 ) error {
 	ctx := cliCtx.Context
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
 
 	consoleOutput.Printf("HTTP server mode")
 
@@ -37,10 +48,10 @@ func RunAsHTTPServer(
 	defer closeRedisStore()
 	redisClient := redisCache.NewClient(redisStore)
 
-	_, err = natsms.NewConsumer(
+	consumer, err := natsms.NewConsumer(
 		cfg.NatsBrokerList,
-		natsms.DriverLocationUpdatedStream,
-		natsms.DriverLocationUpdatedStream,
+		natsms.DriverCoordindateUpdatedStream,
+		natsms.DriverCoordindateUpdatedStream,
 		zapSugaredLogger,
 	)
 	if err != nil {
@@ -48,11 +59,20 @@ func RunAsHTTPServer(
 	}
 
 	coordinateStore := redisCache.NewCoordinateStore(redisClient)
+	go consumer.Consume(
+		ctx,
+		coordinateWorker.NewMessageHandler(
+			coordinateStore,
+			zapSugaredLogger,
+		).Handle,
+	)
+	defer consumer.Stop()
+
 	distanceFinder := distance.NewDistanceFinder(
 		distance.Strategy(appConfig.DistanceAlgorithm),
 		map[distance.Strategy]distance.StrategyExecutor{
 			"Haversine": &distance.Haversine{},
-			"Vincentiy": &distance.Vincenty{},
+			"Vincenty":  &distance.Vincenty{},
 		},
 	)
 	statusStore := redisCache.NewStatusStore(
@@ -60,13 +80,35 @@ func RunAsHTTPServer(
 		coordinateStore,
 		distanceFinder,
 	)
-	statusHandler := httpStatusV1.NewStatusHandler(
+
+	statusServer := httpStatusV1.NewStatusHttpServer(
+		cfg,
 		statusService.NewStatus(
 			statusStore,
 			zapSugaredLogger,
 		),
+		zapSugaredLogger,
 	)
-	httpStatusV1.NewStatusHttpServer(cfg, statusHandler)
+	go func() {
+		consoleOutput.Printf("Starting HTTP Server")
+		err := statusServer.ListenAndServe()
+		if nil != err && err != http.ErrServerClosed {
+			consoleOutput.Printf("Server stopped due to the error: %s", err.Error())
+		}
+	}()
+
+	defer func() {
+		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		consoleOutput.Printf("Stopping HTTP Server...")
+		if err := statusServer.Shutdown(ctx); err != nil {
+			consoleOutput.Printf("HTTP Server shutdown error: %s", err.Error())
+		}
+	}()
+
+	<-stop
+	consoleOutput.Printf("Stopping API server")
 
 	return nil
 }

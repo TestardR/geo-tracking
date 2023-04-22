@@ -8,6 +8,5 @@ import (
 )
 
 type FindStatus interface {
-	// TODO: should be model.DriverId
 	Find(ctx context.Context, driver entity.Driver) (model.Status, error)
 }
