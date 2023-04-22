@@ -9,10 +9,10 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 )
 
-// Distance computes distance in kilometers between coordinates using Haversine formula
-type distanceHaversine struct{}
+// Haversine computes distance in kilometers between coordinates using Haversine formula
+type Haversine struct{}
 
-func (d *distanceHaversine) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
+func (d *Haversine) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
 	if len(coordinates) < 2 {
 		return 0, errors.New("coordinates length must be > 1")
 	}

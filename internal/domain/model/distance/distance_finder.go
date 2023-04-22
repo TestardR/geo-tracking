@@ -17,6 +17,13 @@ type distanceFinder struct {
 	strategies map[Strategy]StrategyExecutor
 }
 
+func NewDistanceFinder(
+	strategy Strategy,
+	strategies map[Strategy]StrategyExecutor,
+) *distanceFinder {
+	return &distanceFinder{strategy: strategy, strategies: strategies}
+}
+
 func (d *distanceFinder) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
 	return d.strategies[d.strategy].Distance(ctx, coordinates)
 }

@@ -9,10 +9,10 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 )
 
-// Distance computes distance in kilometers between coordinates using Vincenty formula
-type distanceVincenty struct{}
+// Vincenty computes distance in kilometers between coordinates using Vincenty formula
+type Vincenty struct{}
 
-func (d *distanceVincenty) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
+func (d *Vincenty) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
 	if len(coordinates) < 2 {
 		return 0, errors.New("coordinates length must be > 1")
 	}

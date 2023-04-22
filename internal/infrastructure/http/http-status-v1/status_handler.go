@@ -6,19 +6,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	sharedError "github.com/TestardR/geo-tracking/internal/domain/shared"
+	"github.com/TestardR/geo-tracking/internal/domain/shared"
+	httpShared "github.com/TestardR/geo-tracking/internal/infrastructure/http/http-shared"
 
 	"github.com/TestardR/geo-tracking/internal/application/query"
 	"github.com/TestardR/geo-tracking/internal/domain/model"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/http/shared"
 )
 
 type getStatusHandler interface {
-	HandleGetStatus(ctx context.Context, query query.GetStatus) (model.Status, error)
-}
-
-type StatusHandler struct {
-	getStatusHandler getStatusHandler
+	Handle(ctx context.Context, query query.GetStatus) (model.Status, error)
 }
 
 type Response struct {
@@ -26,18 +22,25 @@ type Response struct {
 	IsZombie bool   `json:"is_zombie"`
 }
 
+type StatusHandler struct {
+	getStatusHandler getStatusHandler
+}
+
+func NewStatusHandler(getStatusHandler getStatusHandler) *StatusHandler {
+	return &StatusHandler{getStatusHandler: getStatusHandler}
+}
+
 func (h *StatusHandler) GetStatus(ctx *gin.Context) {
 	driverId := ctx.Param("id")
-	status, err := h.getStatusHandler.HandleGetStatus(ctx, query.NewGetStatus(model.NewDriverId(driverId)))
+	status, err := h.getStatusHandler.Handle(ctx, query.NewGetStatus(model.NewDriverId(driverId)))
 	if err != nil {
 		_ = ctx.Error(err)
-		if sharedError.IsDomainError(err) {
-			ctx.JSON(http.StatusBadRequest, shared.ResponseError{Message: err.Error()})
+		if shared.IsDomainError(err) {
+			ctx.JSON(http.StatusBadRequest, httpShared.ResponseError{Message: err.Error()})
 		}
 
-		ctx.JSON(http.StatusInternalServerError, shared.ResponseError{Message: err.Error()})
+		ctx.JSON(http.StatusInternalServerError, httpShared.ResponseError{Message: err.Error()})
 	}
 
 	ctx.JSON(http.StatusOK, Response{DriverId: driverId, IsZombie: status.Zombie()})
-
 }

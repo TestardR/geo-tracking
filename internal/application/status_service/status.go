@@ -14,11 +14,18 @@ type statusFinder interface {
 }
 
 type Status struct {
-	logger       shared.ErrorLogger
 	statusFinder statusFinder
+	logger       shared.ErrorLogger
 }
 
-func (s *Status) HandleGetStatus(ctx context.Context, query query.GetStatus) (model.Status, error) {
+func NewStatus(
+	statusFinder statusFinder,
+	logger shared.ErrorLogger,
+) *Status {
+	return &Status{logger: logger, statusFinder: statusFinder}
+}
+
+func (s *Status) Handle(ctx context.Context, query query.GetStatus) (model.Status, error) {
 	driver := entity.Driver{
 		Id: query.DriverId(),
 	}

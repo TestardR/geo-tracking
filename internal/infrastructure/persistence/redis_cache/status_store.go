@@ -20,7 +20,7 @@ type coordinateFinder interface {
 }
 
 type distanceFinder interface {
-	Find(context.Context, []model.Coordinate) float64
+	Distance(context.Context, []model.Coordinate) (float64, error)
 }
 
 type statusStore struct {
@@ -65,16 +65,19 @@ func (s *statusStore) Find(ctx context.Context, driver entity.Driver) (model.Sta
 	coordinates, err := s.coordinateStore.Find(ctx, driver)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			// return 404
 			return model.Status{}, err
 		}
 
-		// 500
+		return model.Status{}, err
+	}
+
+	distance, err := s.distanceFinder.Distance(ctx, coordinates)
+	if err != nil {
 		return model.Status{}, err
 	}
 
 	status := model.NewStatus(false)
-	status.ComputeZombieStatus(s.distanceFinder.Find(ctx, coordinates))
+	status.ComputeZombieStatus(distance)
 
 	entityStatus := s.toEntity(status)
 	entityStatusAsBytes, err := json.Marshal(entityStatus)

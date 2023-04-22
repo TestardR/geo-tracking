@@ -3,6 +3,8 @@ module github.com/TestardR/geo-tracking
 go 1.18
 
 require (
+	github.com/caarlos0/env/v6 v6.10.1
+	github.com/gin-gonic/gin v1.9.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jftuga/geodist v1.0.0
 	github.com/nats-io/nats.go v1.25.0
@@ -18,7 +20,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.9.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect

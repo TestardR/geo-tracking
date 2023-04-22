@@ -23,6 +23,11 @@ func main() {
 		consoleOutput.Fatal(err)
 	}
 
+	appCfg, err := config.NewApplication()
+	if err != nil {
+		consoleOutput.Fatal(err)
+	}
+
 	app := &cli.App{
 		Name:        "Geo-Tracking",
 		Description: "GT Controller for everything what is fancy",
@@ -33,7 +38,7 @@ func main() {
 				Usage:   "Starts a GT HTTP server",
 				Aliases: []string{"s"},
 				Action: func(c *cli.Context) error {
-					return cmd.RunAsHTTPServer(c, version, cfg, consoleOutput)
+					return cmd.RunAsHTTPServer(c, version, cfg, appCfg, consoleOutput)
 				},
 			},
 		},
