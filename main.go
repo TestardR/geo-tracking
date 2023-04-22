@@ -35,10 +35,18 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:    "http-server",
-				Usage:   "Starts a GT HTTP server",
+				Usage:   "Starts driver status HTTP server",
 				Aliases: []string{"s"},
 				Action: func(c *cli.Context) error {
 					return cmd.RunAsHTTPServer(c, version, cfg, appCfg, consoleOutput)
+				},
+			},
+			{
+				Name:    "coordinate-worker",
+				Usage:   "Starts a coordinate worker to produce coordinates",
+				Aliases: []string{"w"},
+				Action: func(c *cli.Context) error {
+					return cmd.RunCoordinateWorker(c, version, cfg, appCfg, consoleOutput)
 				},
 			},
 		},
