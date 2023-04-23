@@ -6,3 +6,10 @@
     // sliding window algorithm
 
 
+TODO:
+    - infra setup
+    - validation VO / Aggregate
+    - domain repositories
+    - repostory funcs signatures
+    - UTs for distance algo
+    - ITs

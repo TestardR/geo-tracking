@@ -50,8 +50,8 @@ func RunAsHTTPServer(
 
 	consumer, err := natsms.NewConsumer(
 		cfg.NatsBrokerList,
-		natsms.DriverCoordindateUpdatedStream,
-		natsms.DriverCoordindateUpdatedStream,
+		natsms.DriverCoordinateUpdatedStream,
+		natsms.DriverCoordinateUpdatedSubject,
 		zapSugaredLogger,
 	)
 	if err != nil {

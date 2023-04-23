@@ -1,4 +1,4 @@
-package geo_tracking
+package main
 
 import (
 	"log"
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:        "Geo-Tracking",
+		Name:        "geo-tracking",
 		Description: "GT Controller for everything what is fancy",
 		Usage:       "CLI application for managing GT services",
 		Commands: []*cli.Command{
@@ -39,14 +39,6 @@ func main() {
 				Aliases: []string{"s"},
 				Action: func(c *cli.Context) error {
 					return cmd.RunAsHTTPServer(c, version, cfg, appCfg, consoleOutput)
-				},
-			},
-			{
-				Name:    "coordinate-worker",
-				Usage:   "Starts a coordinate worker to produce coordinates",
-				Aliases: []string{"w"},
-				Action: func(c *cli.Context) error {
-					return cmd.RunCoordinateWorker(c, version, cfg, appCfg, consoleOutput)
 				},
 			},
 		},

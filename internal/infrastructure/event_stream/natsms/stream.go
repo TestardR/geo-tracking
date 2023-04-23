@@ -1,3 +1,4 @@
 package natsms
 
-const DriverCoordindateUpdatedStream = "gt.driver-coordinate-update.v1"
+const DriverCoordinateUpdatedStream = "gt.driver-coordinate"
+const DriverCoordinateUpdatedSubject = "gt.driver-coordinate.updated"

@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  geo-tracking:
+    container_name: geo-tracking
+    build:
+      context: .
+    volumes:
+      - "./:/app"
+    env_file:
+      - ".env-docker"
+    ports:
+      - "80:80"
+    entrypoint: ["geo-tracking", "http-server"]
+
+  redis:
+    container_name: redis
+    image: redis:7.0.11
+    ports:
+      - "6379:6379"
+
+  nats:
+    container_name: nats
+    image: nats:2.9.16
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+
