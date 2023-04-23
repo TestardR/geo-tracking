@@ -1,3 +1,3 @@
 package repository
 
-const ErrDriverIdNotFoundMessage = "Driver identified by id %q was not found"
+const ErrDriverIdNotFoundMessage = "Driver was not found"
