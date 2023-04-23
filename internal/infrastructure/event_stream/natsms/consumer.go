@@ -47,14 +47,23 @@ func NewConsumer(
 }
 
 func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) {
-	_, err := c.stream.AddStream(&nats.StreamConfig{
-		Name:     c.streamName,
-		Subjects: []string{c.subject},
-	})
+	_, err := c.stream.StreamInfo(c.streamName)
 	if err != nil {
-		c.logger.Error(fmt.Errorf("cannot add nats stream: %v", err))
+		if err != nats.ErrStreamNotFound {
+			c.logger.Error(fmt.Errorf("cannot get nats info: %v", err))
 
-		return
+			return
+		} else {
+			_, err := c.stream.AddStream(&nats.StreamConfig{
+				Name:     c.streamName,
+				Subjects: []string{c.subject},
+			})
+			if err != nil {
+				c.logger.Error(fmt.Errorf("cannot add nats stream: %v", err))
+
+				return
+			}
+		}
 	}
 
 	sub, err := c.stream.PullSubscribe("", "", nats.BindStream(c.streamName))

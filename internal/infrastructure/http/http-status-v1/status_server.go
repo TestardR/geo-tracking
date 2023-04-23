@@ -27,7 +27,7 @@ func NewStatusHttpServer(
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
 
@@ -45,17 +45,18 @@ func NewStatusHttpServer(
 		status, err := getStatusHandler.Handle(ctx, query.NewGetStatus(driverId))
 		if err != nil {
 			if shared.IsDomainError(err) {
-				http.Error(w, "failed to compare monolith and pim product", http.StatusBadRequest)
+				http.Error(w, "driver_id does not exist", http.StatusBadRequest)
 				logger.Error(fmt.Sprintf("failed to compare monolith and pim product: %v", err))
 
 				return
 			}
 
-			http.Error(w, "failed to compare monolith and pim product", http.StatusInternalServerError)
+			http.Error(w, "failed to compute distance", http.StatusInternalServerError)
 			logger.Error(fmt.Sprintf("failed to compare monolith and pim product: %v", err))
 
 			return
 		}
+		fmt.Println("YOLO")
 
 		data, err := json.Marshal(www.ToWWWStatus(driverId.Id, status.Zombie()))
 		if err != nil {

@@ -13,16 +13,9 @@ services:
       - "80:80"
     entrypoint: ["geo-tracking", "http-server"]
 
-  redis:
-    container_name: redis
-    image: redis:7.0.11
-    ports:
-      - "6379:6379"
+networks:
+  default:
+    external:
+      name: gt
 
-  nats:
-    container_name: nats
-    image: nats:2.9.16
-    ports:
-      - "4222:4222"
-      - "8222:8222"
 

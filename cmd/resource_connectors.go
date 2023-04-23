@@ -22,12 +22,15 @@ func connectToWithCloseRedisCache(
 	connectRetryController := system.NewRetry(10, system.RetryWaitTimeDefault, time.Sleep, logger)
 
 	err = connectRetryController.Handle(ctx, func(ctx context.Context) error {
-		redisClient := redis.NewClient(&redis.Options{
+		redisClient = redis.NewClient(&redis.Options{
 			Addr: cfg.RedisMasterAddr,
 			DB:   cfg.RedisDb,
 		})
 		_, err := redisClient.Ping(ctx).Result()
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, func() {}, fmt.Errorf("cannot connect to Redis Store: %v", err)

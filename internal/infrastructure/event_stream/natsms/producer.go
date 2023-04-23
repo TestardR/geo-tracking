@@ -44,14 +44,21 @@ func NewProducer(
 }
 
 func (p *Producer) Publish(ctx context.Context, driverCoordinate entity.DriverCoordinate) {
-	_, err := p.stream.AddStream(&nats.StreamConfig{
-		Name:     p.streamName,
-		Subjects: []string{p.subject},
-	})
-	if err != nil {
-		p.logger.Error(fmt.Errorf("cannot add nats stream: %v", err))
+	_, err := p.stream.StreamInfo(p.streamName)
+	if err != nats.ErrStreamNotFound {
+		p.logger.Error(fmt.Errorf("cannot get nats info: %v", err))
 
 		return
+	} else {
+		_, err := p.stream.AddStream(&nats.StreamConfig{
+			Name:     p.streamName,
+			Subjects: []string{p.subject},
+		})
+		if err != nil {
+			p.logger.Error(fmt.Errorf("cannot add nats stream: %v", err))
+
+			return
+		}
 	}
 
 	for {
