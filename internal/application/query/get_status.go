@@ -13,5 +13,5 @@ func NewGetStatus(id model.DriverId) GetStatus {
 }
 
 func (q GetStatus) DriverId() string {
-	return q.driverId.Id
+	return q.driverId.Id()
 }

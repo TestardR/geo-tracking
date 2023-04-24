@@ -58,7 +58,7 @@ func NewStatusHttpServer(
 		}
 		fmt.Println("YOLO")
 
-		data, err := json.Marshal(www.ToWWWStatus(driverId.Id, status.Zombie()))
+		data, err := json.Marshal(www.ToWWWStatus(driverId.Id(), status.Zombie()))
 		if err != nil {
 			http.Error(w, "failed to marshal result", http.StatusInternalServerError)
 			logger.Error(fmt.Sprintf("failed to marshal result: %v", err))

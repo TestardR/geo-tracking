@@ -131,7 +131,6 @@ func (c *Consumer) Consume(ctx context.Context, handler ConsumerHandler) {
 
 			err = msg.Ack()
 			if err != nil {
-				// add message ID ?
 				err = fmt.Errorf(
 					"cannot acknowledge message from stream %q: %v",
 					c.streamName,

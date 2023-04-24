@@ -1,9 +1,13 @@
 package model
 
 type DriverId struct {
-	Id string
+	id string
 }
 
 func NewDriverId(id string) DriverId {
-	return DriverId{Id: id}
+	return DriverId{id: id}
+}
+
+func (i *DriverId) Id() string {
+	return i.id
 }
