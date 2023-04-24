@@ -15,8 +15,7 @@ services:
     volumes:
       - "./nats/config:/etc/config"
     command:
-        "-c /etc/config/js.conf"
-
+      "-c /etc/config/js.conf"
 
 networks:
   default:

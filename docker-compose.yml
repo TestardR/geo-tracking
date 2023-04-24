@@ -11,7 +11,7 @@ services:
       - ".env-docker"
     ports:
       - "80:80"
-    entrypoint: ["geo-tracking", "http-server"]
+    entrypoint: [ "geo-tracking", "http-server" ]
 
 networks:
   default:
