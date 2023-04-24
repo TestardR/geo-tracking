@@ -1,4 +1,4 @@
-package coordinate_worker
+package coordinate
 
 import (
 	"context"
@@ -36,8 +36,8 @@ func (h *messageHandler) Handle(ctx context.Context, msg *nats.Msg) error {
 
 	driver := entity.Driver{Id: driverCoordinate.DriverId}
 	coordinate := entity.Coordinate{
-		Longitude: driverCoordinate.Coordinate.Longitude,
-		Latitude:  driverCoordinate.Coordinate.Latitude,
+		Longitude: driverCoordinate.Longitude,
+		Latitude:  driverCoordinate.Latitude,
 	}
 	err = h.coordinatePersister.Persist(ctx, driver, coordinate)
 	if err != nil {

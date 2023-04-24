@@ -14,7 +14,7 @@ import (
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
 	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	coordinateWorker "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate_worker"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http-status-v1"
 	logger "github.com/TestardR/geo-tracking/internal/infrastructure/logging/zap_logger"
@@ -61,7 +61,7 @@ func RunAsHTTPServer(
 	coordinateStore := redisCache.NewCoordinateStore(redisClient)
 	go consumer.Consume(
 		ctx,
-		coordinateWorker.NewMessageHandler(
+		coordinate.NewMessageHandler(
 			coordinateStore,
 			zapSugaredLogger,
 		).Handle,
