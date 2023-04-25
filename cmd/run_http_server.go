@@ -16,7 +16,7 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
-	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http-status-v1"
+	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
 	logger "github.com/TestardR/geo-tracking/internal/infrastructure/logging/zap_logger"
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache"
 )

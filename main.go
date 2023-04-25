@@ -29,9 +29,8 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:        "geo-tracking",
-		Description: "GT Controller for everything what is fancy",
-		Usage:       "CLI application for managing GT services",
+		Name:  "geo-tracking",
+		Usage: "CLI application for managing GT services",
 		Commands: []*cli.Command{
 			{
 				Name:    "http-server",

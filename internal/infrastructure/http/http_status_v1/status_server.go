@@ -56,7 +56,6 @@ func NewStatusHttpServer(
 
 			return
 		}
-		fmt.Println("YOLO")
 
 		data, err := json.Marshal(www.ToWWWStatus(driverId.Id(), status.Zombie()))
 		if err != nil {

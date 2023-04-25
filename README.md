@@ -7,3 +7,5 @@
 TODO:
     - ITs
     - CI
+    - docs
+    - diagrams
