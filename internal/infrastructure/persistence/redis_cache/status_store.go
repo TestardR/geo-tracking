@@ -15,23 +15,19 @@ import (
 	"github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache/entity"
 )
 
-type coordinateFinder interface {
-	Find(context.Context, entity.Driver) ([]model.Coordinate, error)
-}
-
 type distanceFinder interface {
 	Distance(context.Context, []model.Coordinate) (float64, error)
 }
 
 type statusStore struct {
 	redis           *client
-	coordinateStore coordinateFinder
+	coordinateStore repository.CoordinateFinder
 	distanceFinder  distanceFinder
 }
 
 func NewStatusStore(
 	redis *client,
-	coordinateStore coordinateFinder,
+	coordinateStore repository.CoordinateFinder,
 	distanceFinder distanceFinder,
 ) *statusStore {
 	return &statusStore{
@@ -41,8 +37,8 @@ func NewStatusStore(
 	}
 }
 
-func (s *statusStore) Find(ctx context.Context, driver entity.Driver) (model.Status, error) {
-	driverKey := fmt.Sprintf("s:%s", driver.Id)
+func (s *statusStore) Find(ctx context.Context, driverId model.DriverId) (model.Status, error) {
+	driverKey := fmt.Sprintf("s:%s", driverId.Id())
 	statusAsBytes, err := s.redis.Get(ctx, driverKey)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
@@ -59,10 +55,10 @@ func (s *statusStore) Find(ctx context.Context, driver entity.Driver) (model.Sta
 			return model.Status{}, err
 		}
 
-		return s.toDomain(status), nil
+		return statusEntityToModel(status), nil
 	}
 
-	coordinates, err := s.coordinateStore.Find(ctx, driver)
+	coordinates, err := s.coordinateStore.Find(ctx, driverId)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return model.Status{}, err
@@ -79,7 +75,7 @@ func (s *statusStore) Find(ctx context.Context, driver entity.Driver) (model.Sta
 	status := model.NewStatus(false)
 	status.ComputeZombieStatus(distance)
 
-	entityStatus := s.toEntity(status)
+	entityStatus := statusModelToEntity(status)
 	entityStatusAsBytes, err := json.Marshal(entityStatus)
 	if err != nil {
 		// 500
@@ -94,10 +90,10 @@ func (s *statusStore) Find(ctx context.Context, driver entity.Driver) (model.Sta
 	return status, nil
 }
 
-func (s *statusStore) toDomain(status entity.Status) model.Status {
+func statusEntityToModel(status entity.Status) model.Status {
 	return model.NewStatus(status.IsZombie)
 }
 
-func (s *statusStore) toEntity(status model.Status) entity.Status {
+func statusModelToEntity(status model.Status) entity.Status {
 	return entity.Status{IsZombie: status.Zombie()}
 }

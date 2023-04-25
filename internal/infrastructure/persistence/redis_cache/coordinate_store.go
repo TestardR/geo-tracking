@@ -27,21 +27,21 @@ func NewCoordinateStore(redis *client) *coordinateStore {
 
 func (s *coordinateStore) Persist(
 	ctx context.Context,
-	driver entity.Driver,
-	coordinate entity.Coordinate,
+	driverId model.DriverId,
+	coordinate model.Coordinate,
 ) error {
-	coordinatesAsBytes, err := s.redis.Get(ctx, fmt.Sprintf("c:%s", driver.Id))
+	coordinatesAsBytes, err := s.redis.Get(ctx, fmt.Sprintf("c:%s", driverId.Id()))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			var coordinates []entity.Coordinate
-			coordinates = append(coordinates, coordinate)
+			coordinates = append(coordinates, coordinateModelToEntity(coordinate))
 
 			coordinatesAsBytes, err = json.Marshal(coordinates)
 			if err != nil {
 				return err
 			}
 
-			return s.redis.Set(ctx, driver.Id, coordinatesAsBytes, time.Duration(0))
+			return s.redis.Set(ctx, driverId.Id(), coordinatesAsBytes, time.Duration(0))
 		}
 		return err
 	}
@@ -57,21 +57,21 @@ func (s *coordinateStore) Persist(
 	}
 
 	coordinates = coordinates[:len(coordinates)-1]
-	coordinates = append(coordinates, coordinate)
+	coordinates = append(coordinates, coordinateModelToEntity(coordinate))
 
 	coordinatesAsBytes, err = json.Marshal(coordinates)
 	if err != nil {
 		return err
 	}
 
-	return s.redis.Set(ctx, driver.Id, coordinatesAsBytes, time.Duration(0))
+	return s.redis.Set(ctx, driverId.Id(), coordinatesAsBytes, time.Duration(0))
 }
 
 func (s *coordinateStore) Find(
 	ctx context.Context,
-	driver entity.Driver,
+	driverId model.DriverId,
 ) ([]model.Coordinate, error) {
-	coordinatesAsBytes, err := s.redis.Get(ctx, driver.Id)
+	coordinatesAsBytes, err := s.redis.Get(ctx, driverId.Id())
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return nil, shared.NewDomainError(repository.ErrDriverIdNotFoundMessage)
@@ -85,14 +85,19 @@ func (s *coordinateStore) Find(
 		return nil, err
 	}
 
-	return s.toDomain(coordinates), nil
-}
-
-func (s *coordinateStore) toDomain(entities []entity.Coordinate) []model.Coordinate {
-	var coordinates []model.Coordinate
-	for _, coordinate := range entities {
-		coordinates = append(coordinates, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude))
+	var modelCoordinates []model.Coordinate
+	for _, coordinate := range coordinates {
+		modelCoordinates = append(modelCoordinates,
+			model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude),
+		)
 	}
 
-	return coordinates
+	return modelCoordinates, nil
+}
+
+func coordinateModelToEntity(coordinate model.Coordinate) entity.Coordinate {
+	return entity.Coordinate{
+		Longitude: coordinate.Longitude(),
+		Latitude:  coordinate.Latitude(),
+	}
 }

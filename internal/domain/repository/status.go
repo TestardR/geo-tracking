@@ -4,9 +4,8 @@ import (
 	"context"
 
 	"github.com/TestardR/geo-tracking/internal/domain/model"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache/entity"
 )
 
-type FindStatus interface {
-	Find(ctx context.Context, driver entity.Driver) (model.Status, error)
+type StatusFinder interface {
+	Find(ctx context.Context, driverId model.DriverId) (model.Status, error)
 }

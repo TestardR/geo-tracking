@@ -5,7 +5,5 @@
 - A driver status is not moving if he has driven less than 500 meters in the last 5 minutes
 
 TODO:
-    - repostory funcs signatures
-    - domain repositories
     - UTs for distance algo
     - ITs
