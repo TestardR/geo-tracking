@@ -3,6 +3,7 @@ module github.com/TestardR/geo-tracking
 go 1.18
 
 require (
+	github.com/bsm/gomega v1.26.0
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jftuga/geodist v1.0.0

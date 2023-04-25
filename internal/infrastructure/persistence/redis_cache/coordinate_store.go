@@ -34,7 +34,7 @@ func (s *coordinateStore) Persist(
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			var coordinates []entity.Coordinate
-			coordinates = append(coordinates, coordinateModelToEntity(coordinate))
+			coordinates = append(coordinates, CoordinateModelToEntity(coordinate))
 
 			coordinatesAsBytes, err = json.Marshal(coordinates)
 			if err != nil {
@@ -57,7 +57,7 @@ func (s *coordinateStore) Persist(
 	}
 
 	coordinates = coordinates[:len(coordinates)-1]
-	coordinates = append(coordinates, coordinateModelToEntity(coordinate))
+	coordinates = append(coordinates, CoordinateModelToEntity(coordinate))
 
 	coordinatesAsBytes, err = json.Marshal(coordinates)
 	if err != nil {
@@ -95,7 +95,7 @@ func (s *coordinateStore) Find(
 	return modelCoordinates, nil
 }
 
-func coordinateModelToEntity(coordinate model.Coordinate) entity.Coordinate {
+func CoordinateModelToEntity(coordinate model.Coordinate) entity.Coordinate {
 	return entity.Coordinate{
 		Longitude: coordinate.Longitude(),
 		Latitude:  coordinate.Latitude(),
