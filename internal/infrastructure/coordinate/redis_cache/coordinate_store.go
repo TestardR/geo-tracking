@@ -12,16 +12,17 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 	"github.com/TestardR/geo-tracking/internal/domain/repository"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache/entity"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache/entity"
+	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 )
 
 const maxNumberOfCoordinates = 30
 
 type coordinateStore struct {
-	redis *client
+	redis *redisCache.Client
 }
 
-func NewCoordinateStore(redis *client) *coordinateStore {
+func NewCoordinateStore(redis *redisCache.Client) *coordinateStore {
 	return &coordinateStore{redis: redis}
 }
 

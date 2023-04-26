@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache/entity"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache/entity"
 )
 
 type Status struct {

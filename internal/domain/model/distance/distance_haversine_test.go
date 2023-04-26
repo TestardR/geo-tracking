@@ -7,7 +7,7 @@ import (
 	"github.com/bsm/gomega"
 
 	"github.com/TestardR/geo-tracking/internal/domain/model"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache/entity"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache/entity"
 )
 
 func TestCanComputeDistanceWithHaversineFormula(t *testing.T) {

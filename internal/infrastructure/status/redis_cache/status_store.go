@@ -12,7 +12,8 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 	"github.com/TestardR/geo-tracking/internal/domain/repository"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache/entity"
+	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache/entity"
 )
 
 type distanceFinder interface {
@@ -20,13 +21,13 @@ type distanceFinder interface {
 }
 
 type statusStore struct {
-	redis           *client
+	redis           *redisCache.Client
 	coordinateStore repository.CoordinateFinder
 	distanceFinder  distanceFinder
 }
 
 func NewStatusStore(
-	redis *client,
+	redis *redisCache.Client,
 	coordinateStore repository.CoordinateFinder,
 	distanceFinder distanceFinder,
 ) *statusStore {
@@ -78,12 +79,10 @@ func (s *statusStore) Find(ctx context.Context, driverId model.DriverId) (model.
 	entityStatus := statusModelToEntity(status)
 	entityStatusAsBytes, err := json.Marshal(entityStatus)
 	if err != nil {
-		// 500
 		return model.Status{}, err
 	}
 	err = s.redis.Set(ctx, driverKey, entityStatusAsBytes, time.Duration(0))
 	if err != nil {
-		// 500
 		return model.Status{}, err
 	}
 

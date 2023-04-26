@@ -14,11 +14,13 @@ import (
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
 	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate"
+	natsmsEvent "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms"
+	coordinateCache "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
 	logger "github.com/TestardR/geo-tracking/internal/infrastructure/logging/zap_logger"
-	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/persistence/redis_cache"
+	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
+	statusCache "github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache"
 )
 
 func RunAsHTTPServer(
@@ -58,10 +60,10 @@ func RunAsHTTPServer(
 		return err
 	}
 
-	coordinateStore := redisCache.NewCoordinateStore(redisClient)
+	coordinateStore := coordinateCache.NewCoordinateStore(redisClient)
 	go consumer.Consume(
 		ctx,
-		coordinate.NewMessageHandler(
+		natsmsEvent.NewCoordinateHandler(
 			coordinateStore,
 			zapSugaredLogger,
 		).Handle,
@@ -75,7 +77,7 @@ func RunAsHTTPServer(
 			"Vincenty":  &distance.Vincenty{},
 		},
 	)
-	statusStore := redisCache.NewStatusStore(
+	statusStore := statusCache.NewStatusStore(
 		redisClient,
 		coordinateStore,
 		distanceFinder,

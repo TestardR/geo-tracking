@@ -8,7 +8,7 @@ import (
 	"github.com/nats-io/nats.go"
 
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms/entity"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 )
 
 type Producer struct {

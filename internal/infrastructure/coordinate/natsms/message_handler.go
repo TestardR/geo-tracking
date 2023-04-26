@@ -1,4 +1,4 @@
-package coordinate
+package natsms
 
 import (
 	"context"
@@ -9,23 +9,23 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 	"github.com/TestardR/geo-tracking/internal/domain/repository"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	msgEntity "github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms/entity"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 )
 
-type messageHandler struct {
+type coordinateHandler struct {
 	coordinatePersister repository.CoordinatePersister
 	logger              shared.ErrorLogger
 }
 
-func NewMessageHandler(
+func NewCoordinateHandler(
 	coordinatePersister repository.CoordinatePersister,
 	logger shared.ErrorLogger,
-) *messageHandler {
-	return &messageHandler{logger: logger, coordinatePersister: coordinatePersister}
+) *coordinateHandler {
+	return &coordinateHandler{logger: logger, coordinatePersister: coordinatePersister}
 }
 
-func (h *messageHandler) Handle(ctx context.Context, msg *nats.Msg) error {
-	var driverCoordinate msgEntity.DriverCoordinate
+func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
+	var driverCoordinate entity.DriverCoordinate
 	err := json.Unmarshal(msg.Data, &driverCoordinate)
 	if err != nil {
 		return err
