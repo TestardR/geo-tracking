@@ -6,6 +6,11 @@ import (
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 )
 
+const (
+	HaversineFormula string = "haversine"
+	VincentyFormula  string = "vincenty"
+)
+
 type StrategyExecutor interface {
 	Distance(context.Context, []model.Coordinate) (float64, error)
 }

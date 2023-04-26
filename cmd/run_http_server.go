@@ -73,8 +73,8 @@ func RunAsHTTPServer(
 	distanceFinder := distance.NewDistanceFinder(
 		distance.Strategy(appConfig.DistanceAlgorithm),
 		map[distance.Strategy]distance.StrategyExecutor{
-			"Haversine": &distance.Haversine{},
-			"Vincenty":  &distance.Vincenty{},
+			distance.Strategy(distance.HaversineFormula): &distance.Haversine{},
+			distance.Strategy(distance.VincentyFormula):  &distance.Vincenty{},
 		},
 	)
 	statusStore := statusCache.NewStatusStore(
