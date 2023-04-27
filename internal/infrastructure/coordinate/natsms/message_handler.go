@@ -6,22 +6,21 @@ import (
 
 	"github.com/nats-io/nats.go"
 
+	"github.com/TestardR/geo-tracking/internal/application/command"
 	"github.com/TestardR/geo-tracking/internal/domain/model"
-	"github.com/TestardR/geo-tracking/internal/domain/repository"
-	"github.com/TestardR/geo-tracking/internal/domain/shared"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 )
 
-type coordinateHandler struct {
-	coordinatePersister repository.CoordinatePersister
-	logger              shared.ErrorLogger
+type Handler interface {
+	Handle(ctx context.Context, cmd command.AddCoordinate) error
 }
 
-func NewCoordinateHandler(
-	coordinatePersister repository.CoordinatePersister,
-	logger shared.ErrorLogger,
-) *coordinateHandler {
-	return &coordinateHandler{logger: logger, coordinatePersister: coordinatePersister}
+type coordinateHandler struct {
+	coordinateService Handler
+}
+
+func NewCoordinateHandler(coordinateService Handler) *coordinateHandler {
+	return &coordinateHandler{coordinateService: coordinateService}
 }
 
 func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
@@ -37,7 +36,8 @@ func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
 		return err
 	}
 
-	err = h.coordinatePersister.Persist(ctx, driverId, coordinate)
+	cmd := command.NewAddCoordinate(driverId, coordinate)
+	err = h.coordinateService.Handle(ctx, cmd)
 	if err != nil {
 		return err
 	}

@@ -17,6 +17,6 @@ func (c AddCoordinate) DriverId() model.DriverId {
 	return c.driverId
 }
 
-func (c AddCoordinate) Name() model.Coordinate {
+func (c AddCoordinate) Coordinate() model.Coordinate {
 	return c.coordinate
 }

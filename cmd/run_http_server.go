@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/TestardR/geo-tracking/config"
+	coordinateService "github.com/TestardR/geo-tracking/internal/application/coordinate_service"
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
 	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
@@ -64,8 +65,7 @@ func RunAsHTTPServer(
 	go consumer.Consume(
 		ctx,
 		natsmsEvent.NewCoordinateHandler(
-			coordinateStore,
-			zapSugaredLogger,
+			coordinateService.New(coordinateStore),
 		).Handle,
 	)
 	defer consumer.Stop()
@@ -85,10 +85,7 @@ func RunAsHTTPServer(
 
 	statusServer := httpStatusV1.NewStatusHttpServer(
 		cfg,
-		statusService.NewStatus(
-			statusStore,
-			zapSugaredLogger,
-		),
+		statusService.New(statusStore),
 		zapSugaredLogger,
 	)
 	go func() {

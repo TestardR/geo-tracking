@@ -7,21 +7,24 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bsm/gomega"
+
 	"github.com/TestardR/geo-tracking/config"
 	"github.com/TestardR/geo-tracking/integration/infrastructure/shared/redis_cache"
 	"github.com/TestardR/geo-tracking/integration/test_shared"
+	coordinateService "github.com/TestardR/geo-tracking/internal/application/coordinate_service"
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
 	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
+	natsmsEvent "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms"
 	coordinateCache "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 	statusCache "github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache"
-	"github.com/bsm/gomega"
 )
 
 func TestGetDriverZombieStatus(t *testing.T) {
-	_ = context.Background()
+	ctx := context.Background()
 	redis := redis_cache.MustConnectToRedis(t)
 	logger := test_shared.NewMockedLogger(t)
 	muteLogger := test_shared.NewMockedSilentLogger(t)
@@ -30,7 +33,7 @@ func TestGetDriverZombieStatus(t *testing.T) {
 	redisClient := redisCache.NewClient(redis)
 	coordinateStore := coordinateCache.NewCoordinateStore(redisClient)
 
-	_, err := natsms.NewConsumer(
+	consumer, err := natsms.NewConsumer(
 		integrationEnvConfig.NatsBrokerList,
 		natsms.DriverCoordinateUpdatedStream,
 		natsms.DriverCoordinateUpdatedSubject,
@@ -40,24 +43,23 @@ func TestGetDriverZombieStatus(t *testing.T) {
 		logger.Error("Error creating consumer")
 	}
 
-	// go consumer.Consume(
-	// 	ctx,
-	// 	natsmsEvent.NewCoordinateHandler(
-	// 		coordinateStore,
-	// 		muteLogger,
-	// 	).Handle,
-	// )
-	// defer consumer.Stop()
-
-	_, err = natsms.NewProducer(
-		integrationEnvConfig.NatsBrokerList,
-		natsms.DriverCoordinateUpdatedStream,
-		natsms.DriverCoordinateUpdatedSubject,
-		muteLogger,
+	go consumer.Consume(
+		ctx,
+		natsmsEvent.NewCoordinateHandler(
+			coordinateService.New(coordinateStore),
+		).Handle,
 	)
-	if err != nil {
-		logger.Error("Error creating producer")
-	}
+	defer consumer.Stop()
+
+	//_, err = natsms.NewProducer(
+	//	integrationEnvConfig.NatsBrokerList,
+	//	natsms.DriverCoordinateUpdatedStream,
+	//	natsms.DriverCoordinateUpdatedSubject,
+	//	muteLogger,
+	//)
+	//if err != nil {
+	//	logger.Error("Error creating producer")
+	//}
 
 	distanceFinder := distance.NewDistanceFinder(
 		distance.Strategy(distance.HaversineFormula),
@@ -74,10 +76,7 @@ func TestGetDriverZombieStatus(t *testing.T) {
 	cfg := config.Config(*integrationEnvConfig)
 	statusServer := httpStatusV1.NewStatusHttpServer(
 		&cfg,
-		statusService.NewStatus(
-			statusStore,
-			muteLogger,
-		),
+		statusService.New(statusStore),
 		muteLogger,
 	)
 
