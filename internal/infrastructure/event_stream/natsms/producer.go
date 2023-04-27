@@ -43,12 +43,12 @@ func NewProducer(
 	}, nil
 }
 
-func (p *Producer) Publish(ctx context.Context, driverCoordinate entity.DriverCoordinate) {
+func (p *Producer) Publish(ctx context.Context, driverCoordinate entity.DriverCoordinate) error {
 	_, err := p.stream.StreamInfo(p.streamName)
 	if err != nats.ErrStreamNotFound {
 		p.logger.Error(fmt.Errorf("cannot get nats info: %v", err))
 
-		return
+		return err
 	} else {
 		_, err := p.stream.AddStream(&nats.StreamConfig{
 			Name:     p.streamName,
@@ -57,30 +57,23 @@ func (p *Producer) Publish(ctx context.Context, driverCoordinate entity.DriverCo
 		if err != nil {
 			p.logger.Error(fmt.Errorf("cannot add nats stream: %v", err))
 
-			return
+			return err
 		}
 	}
 
-	for {
-		select {
-		case <-p.stop:
-			p.logger.Info(fmt.Sprintf("message producing to stream %q was stopped", p.streamName))
+	data, err := json.Marshal(driverCoordinate)
+	if err != nil {
+		p.logger.Error(fmt.Errorf("failed to marshal coordinate: %v", err))
 
-			return
-		default:
-			data, err := json.Marshal(driverCoordinate)
-			if err != nil {
-				p.logger.Error(fmt.Errorf("failed to marshal coordinate: %v", err))
-
-				continue
-			}
-
-			_, err = p.stream.Publish(p.subject, data)
-			if err != nil {
-				p.logger.Error(fmt.Errorf("cannot publish to stream: %v", err))
-
-				continue
-			}
-		}
+		return err
 	}
+
+	_, err = p.stream.Publish(p.subject, data)
+	if err != nil {
+		p.logger.Error(fmt.Errorf("cannot publish to stream: %v", err))
+
+		return err
+	}
+
+	return nil
 }

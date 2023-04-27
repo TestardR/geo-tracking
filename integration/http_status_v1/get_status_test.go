@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/bsm/gomega"
 
@@ -16,6 +17,7 @@ import (
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
 	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
 	natsmsEvent "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 	coordinateCache "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
@@ -37,7 +39,7 @@ func TestGetDriverZombieStatus(t *testing.T) {
 		integrationEnvConfig.NatsBrokerList,
 		natsms.DriverCoordinateUpdatedStream,
 		natsms.DriverCoordinateUpdatedSubject,
-		muteLogger,
+		logger,
 	)
 	if err != nil {
 		logger.Error("Error creating consumer")
@@ -51,15 +53,15 @@ func TestGetDriverZombieStatus(t *testing.T) {
 	)
 	defer consumer.Stop()
 
-	//_, err = natsms.NewProducer(
-	//	integrationEnvConfig.NatsBrokerList,
-	//	natsms.DriverCoordinateUpdatedStream,
-	//	natsms.DriverCoordinateUpdatedSubject,
-	//	muteLogger,
-	//)
-	//if err != nil {
-	//	logger.Error("Error creating producer")
-	//}
+	producer, err := natsms.NewProducer(
+		integrationEnvConfig.NatsBrokerList,
+		natsms.DriverCoordinateUpdatedStream,
+		natsms.DriverCoordinateUpdatedSubject,
+		muteLogger,
+	)
+	if err != nil {
+		logger.Error("Error creating producer")
+	}
 
 	distanceFinder := distance.NewDistanceFinder(
 		distance.Strategy(distance.HaversineFormula),
@@ -85,6 +87,8 @@ func TestGetDriverZombieStatus(t *testing.T) {
 	t.Cleanup(func() {
 		ts.Close()
 
+		defer consumer.Stop()
+
 		err := redis.Close()
 		if err != nil {
 			t.Log(err)
@@ -93,7 +97,34 @@ func TestGetDriverZombieStatus(t *testing.T) {
 
 	g := gomega.NewWithT(t)
 
-	t.Run("it should return 200 when healthz is ok", func(t *testing.T) {
+	t.Run("it should return 200 and driver_id status", func(t *testing.T) {
+		messages := []entity.DriverCoordinate{
+			{
+				DriverId:  "123",
+				Longitude: 48.908394,
+				Latitude:  2.363022,
+				CreatedAt: time.Now().UTC(),
+			},
+			{
+				DriverId:  "123",
+				Longitude: 48.908261,
+				Latitude:  2.364596,
+				CreatedAt: time.Now().UTC(),
+			},
+			{
+				DriverId:  "123",
+				Longitude: 48.907214,
+				Latitude:  2.364462,
+				CreatedAt: time.Now().UTC(),
+			},
+		}
+		for _, msg := range messages {
+			err = producer.Publish(ctx, msg)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
 		resp, err := http.Get(fmt.Sprintf("%s/healthz", ts.URL))
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
@@ -101,5 +132,4 @@ func TestGetDriverZombieStatus(t *testing.T) {
 
 		g.Expect(resp.StatusCode).To(gomega.Equal(http.StatusOK))
 	})
-
 }
