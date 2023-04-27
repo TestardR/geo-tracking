@@ -5,7 +5,7 @@ import (
 )
 
 type Application struct {
-	DistanceAlgorithm string `env:"DISTANCE_ALGORITHM" example:"Haversine|Vincenty" envDefault:"Haversine"`
+	DistanceAlgorithm string `env:"DISTANCE_ALGORITHM" example:"haversine|vincenty" envDefault:"haversine"`
 }
 
 func NewApplication() (*Application, error) {
