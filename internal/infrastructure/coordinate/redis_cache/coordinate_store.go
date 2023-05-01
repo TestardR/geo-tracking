@@ -42,7 +42,7 @@ func (s *coordinateStore) Persist(
 				return err
 			}
 
-			return s.redis.Set(ctx, driverId.Id(), coordinatesAsBytes, time.Duration(0))
+			return s.redis.Set(ctx, fmt.Sprintf("c:%s", driverId.Id()), coordinatesAsBytes, time.Duration(0))
 		}
 		return err
 	}
@@ -65,14 +65,14 @@ func (s *coordinateStore) Persist(
 		return err
 	}
 
-	return s.redis.Set(ctx, driverId.Id(), coordinatesAsBytes, time.Duration(0))
+	return s.redis.Set(ctx, fmt.Sprintf("c:%s", driverId.Id()), coordinatesAsBytes, time.Duration(0))
 }
 
 func (s *coordinateStore) Find(
 	ctx context.Context,
 	driverId model.DriverId,
 ) ([]model.Coordinate, error) {
-	coordinatesAsBytes, err := s.redis.Get(ctx, driverId.Id())
+	coordinatesAsBytes, err := s.redis.Get(ctx, fmt.Sprintf("c:%s", driverId.Id()))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return nil, shared.NewDomainError(repository.ErrDriverIdNotFoundMessage)

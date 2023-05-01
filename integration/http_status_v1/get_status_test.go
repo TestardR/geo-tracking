@@ -11,7 +11,8 @@ import (
 	"github.com/bsm/gomega"
 
 	"github.com/TestardR/geo-tracking/config"
-	"github.com/TestardR/geo-tracking/integration/infrastructure/shared/redis_cache"
+
+	"github.com/TestardR/geo-tracking/integration/components/infrastructure/persistence/redis_cache"
 	"github.com/TestardR/geo-tracking/integration/test_shared"
 	coordinateService "github.com/TestardR/geo-tracking/internal/application/coordinate_service"
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"

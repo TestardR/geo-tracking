@@ -46,13 +46,13 @@ func NewStatusHttpServer(
 		if err != nil {
 			if shared.IsDomainError(err) {
 				http.Error(w, "driver_id does not exist", http.StatusBadRequest)
-				logger.Error(fmt.Sprintf("failed to compare monolith and pim product: %v", err))
+				logger.Error(fmt.Sprintf("driver_id does not exist: %v", err))
 
 				return
 			}
 
 			http.Error(w, "failed to compute distance", http.StatusInternalServerError)
-			logger.Error(fmt.Sprintf("failed to compare monolith and pim product: %v", err))
+			logger.Error(fmt.Sprintf("failed to compute distance: %v", err))
 
 			return
 		}
