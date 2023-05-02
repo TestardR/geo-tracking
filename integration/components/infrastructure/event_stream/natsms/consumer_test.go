@@ -12,21 +12,29 @@ import (
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 )
 
-func TestCanProduceMessagesToEventStream(t *testing.T) {
+func TestCanConsumeMessagesFromEventStream(t *testing.T) {
 	ctx := context.Background()
-	logger := test_shared.NewMockedLogger(t)
-
 	muteLogger := test_shared.NewMockedSilentLogger(t)
 	integrationEnvConfig := test_shared.GetIntegrationConfig(t)
 
 	producer, err := natsms.NewProducer(
 		integrationEnvConfig.NatsBrokerList,
-		"producer.test",
-		"producer.test.event",
+		"consumer.test",
+		"consumer.test.event",
 		muteLogger,
 	)
 	if err != nil {
-		logger.Error("Error creating producer")
+		t.Fatal("Error creating producer")
+	}
+
+	consumer, err := natsms.NewConsumer(
+		integrationEnvConfig.NatsBrokerList,
+		"consumer.test",
+		"consumer.test.event",
+		muteLogger,
+	)
+	if err != nil {
+		t.Fatal("Error creating consumer")
 	}
 
 	g := gomega.NewWithT(t)
