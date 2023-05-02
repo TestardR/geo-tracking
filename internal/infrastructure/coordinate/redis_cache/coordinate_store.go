@@ -16,8 +16,6 @@ import (
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 )
 
-const maxNumberOfCoordinates = 30
-
 type coordinateStore struct {
 	redis *redisCache.Client
 }
@@ -44,6 +42,7 @@ func (s *coordinateStore) Persist(
 
 			return s.redis.Set(ctx, fmt.Sprintf("c:%s", driverId.Id()), coordinatesAsBytes, time.Duration(0))
 		}
+
 		return err
 	}
 
@@ -53,14 +52,17 @@ func (s *coordinateStore) Persist(
 		return err
 	}
 
-	if len(coordinates) >= maxNumberOfCoordinates {
-		coordinates = coordinates[:len(coordinates)-1]
+	inTimeWindowCoordinates := make([]entity.Coordinate, len(coordinates), 0)
+	t := time.Now()
+	for _, c := range coordinates {
+		if t.Sub(c.CreatedAt).Minutes() < 5 {
+			inTimeWindowCoordinates = append(inTimeWindowCoordinates, c)
+		}
+
 	}
 
-	coordinates = coordinates[:len(coordinates)-1]
-	coordinates = append(coordinates, CoordinateModelToEntity(coordinate))
-
-	coordinatesAsBytes, err = json.Marshal(coordinates)
+	inTimeWindowCoordinates = append(inTimeWindowCoordinates, CoordinateModelToEntity(coordinate))
+	coordinatesAsBytes, err = json.Marshal(inTimeWindowCoordinates)
 	if err != nil {
 		return err
 	}
@@ -89,7 +91,11 @@ func (s *coordinateStore) Find(
 	var modelCoordinates []model.Coordinate
 	for _, coordinate := range coordinates {
 		modelCoordinates = append(modelCoordinates,
-			model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude),
+			model.RecreateCoordinate(
+				coordinate.Longitude,
+				coordinate.Latitude,
+				coordinate.CreatedAt,
+			),
 		)
 	}
 
@@ -100,5 +106,6 @@ func CoordinateModelToEntity(coordinate model.Coordinate) entity.Coordinate {
 	return entity.Coordinate{
 		Longitude: coordinate.Longitude(),
 		Latitude:  coordinate.Latitude(),
+		CreatedAt: coordinate.CreatedAt(),
 	}
 }

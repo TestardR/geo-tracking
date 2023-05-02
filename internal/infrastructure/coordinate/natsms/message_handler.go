@@ -53,7 +53,11 @@ func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
 	}
 
 	driverId := model.NewDriverId(driverCoordinate.DriverId)
-	coordinate, err := model.NewCoordinate(driverCoordinate.Longitude, driverCoordinate.Longitude)
+	coordinate, err := model.NewCoordinate(
+		driverCoordinate.Longitude,
+		driverCoordinate.Latitude,
+		driverCoordinate.CreatedAt,
+	)
 	if err != nil {
 		return err
 	}

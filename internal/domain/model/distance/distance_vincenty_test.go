@@ -3,6 +3,7 @@ package distance
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/bsm/gomega"
 
@@ -24,7 +25,7 @@ func TestCanComputeDistanceWithVincentyFormula(t *testing.T) {
 
 		var coordinatesModel []model.Coordinate
 		for _, coordinate := range coordinates {
-			coordinatesModel = append(coordinatesModel, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude))
+			coordinatesModel = append(coordinatesModel, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude, time.Now()))
 		}
 
 		result, _ := distance.Distance(context.Background(), coordinatesModel)
@@ -41,7 +42,7 @@ func TestCanComputeDistanceWithVincentyFormula(t *testing.T) {
 
 		var coordinatesModel []model.Coordinate
 		for _, coordinate := range coordinates {
-			coordinatesModel = append(coordinatesModel, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude))
+			coordinatesModel = append(coordinatesModel, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude, time.Now()))
 		}
 
 		result, _ := distance.Distance(context.Background(), coordinatesModel)
