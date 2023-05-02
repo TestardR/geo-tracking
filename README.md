@@ -65,5 +65,6 @@ Access pages locally, such as:
 - http://localhost/status?driver_id=123
 
 Note: driver's coordinate and status are updated through events. 
-Events can be easily produced running integration test ./integration/http_status_v1
+- Events can be easily produced running integration test ./integration/http_status_v1
+- You will need to have ginkgo testing framwework installed https://onsi.github.io/ginkgo/#installing-ginkgo
 
