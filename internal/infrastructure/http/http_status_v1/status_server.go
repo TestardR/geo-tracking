@@ -22,7 +22,6 @@ func NewStatusHttpServer(
 	cfg *config.Config,
 	getStatusHandler getStatusHandler,
 	logger shared.ErrorLogger,
-
 ) *http.Server {
 	mux := http.NewServeMux()
 

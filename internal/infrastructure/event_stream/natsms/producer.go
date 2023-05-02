@@ -12,18 +12,18 @@ import (
 )
 
 type Producer struct {
+	conn       *nats.Conn
 	stream     nats.JetStreamContext
 	streamName string
 	subject    string
-	logger     shared.ErrorInfoLogger
-	stop       chan struct{}
+	logger     shared.ErrorLogger
 }
 
 func NewProducer(
 	broker,
 	streamName,
 	subject string,
-	logger shared.ErrorInfoLogger,
+	logger shared.ErrorLogger,
 ) (*Producer, error) {
 	nc, err := nats.Connect(broker)
 	if err != nil {
@@ -36,6 +36,7 @@ func NewProducer(
 	}
 
 	return &Producer{
+		conn:       nc,
 		stream:     js,
 		streamName: streamName,
 		subject:    subject,
@@ -77,4 +78,8 @@ func (p *Producer) Publish(ctx context.Context, driverCoordinate entity.DriverCo
 	}
 
 	return nil
+}
+
+func (p *Producer) Close() {
+	p.conn.Close()
 }

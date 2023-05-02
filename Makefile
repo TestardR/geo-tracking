@@ -18,12 +18,6 @@ test:
 	@ginkgo -r -cover ./internal
 	@echo "Running tests, done!"
 
-#integration-test:
-#	./ops/integration-test.sh
-
-#features-test:
-#	./ops/features-test.sh
-
 build: deps clean
 	@echo "Building ...."
 	@mkdir -p ./build
