@@ -1,0 +1,42 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+package "Infrastructure - HTTP" {
+   [HTTP GET Status] as http_get_status
+}
+
+package "Infrastructure - Event Stream" {
+   [driver-coordinate.udpated Event] as event_driver_coordinate
+}
+
+package "Application" {
+    http_get_status ---> [Status Service] : Read Driver's Status
+    event_driver_coordinate --> [Coordinate Service]: Change Driver's Coordinate
+}
+
+package "Domain" {
+    [Coordinate]
+    [Status]
+    [Distance]
+
+    [Status Service] --> [Status]
+    [Coordinate Service] --> [Coordinate]: 1. add driver's coordinate
+    [Coordinate Service] --> [Distance]: 2. compute driver's status
+
+    [Distance] --> [Status]
+    [Distance] --> [Coordinate]
+}
+
+package "Infrastructure - Persistence" {
+     database "Redis" {
+          folder "cache" {
+            [status]
+            [coordinate]
+          }
+}
+
+[Status] -- [status]
+
+[Coordinate] -- [coordinate]
+
+@enduml

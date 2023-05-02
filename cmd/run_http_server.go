@@ -61,15 +61,6 @@ func RunAsHTTPServer(
 		return err
 	}
 
-	coordinateStore := coordinateCache.NewCoordinateStore(redisClient)
-	go consumer.Consume(
-		ctx,
-		natsmsEvent.NewCoordinateHandler(
-			coordinateService.New(coordinateStore),
-		).Handle,
-	)
-	defer consumer.Stop()
-
 	distanceFinder := distance.NewDistanceFinder(
 		distance.Strategy(appConfig.DistanceAlgorithm),
 		map[distance.Strategy]distance.StrategyExecutor{
@@ -77,15 +68,24 @@ func RunAsHTTPServer(
 			distance.Strategy(distance.VincentyFormula):  &distance.Vincenty{},
 		},
 	)
-	statusStore := statusCache.NewStatusStore(
-		redisClient,
-		coordinateStore,
-		distanceFinder,
+	coordinateStore := coordinateCache.NewCoordinateStore(redisClient)
+	statusStore := statusCache.NewStatusStore(redisClient)
+	statusSvc := statusService.NewService(statusStore, coordinateStore, distanceFinder)
+
+	go consumer.Consume(
+		ctx,
+		natsmsEvent.NewCoordinateHandler(
+			coordinateService.New(coordinateStore),
+			statusSvc,
+			coordinateStore,
+			distanceFinder,
+		).Handle,
 	)
+	defer consumer.Stop()
 
 	statusServer := httpStatusV1.NewStatusHttpServer(
 		cfg,
-		statusService.New(statusStore),
+		statusSvc,
 		zapSugaredLogger,
 	)
 	go func() {

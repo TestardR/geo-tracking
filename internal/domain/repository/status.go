@@ -9,3 +9,7 @@ import (
 type StatusFinder interface {
 	Find(ctx context.Context, driverId model.DriverId) (model.Status, error)
 }
+
+type StatusPersister interface {
+	Persist(ctx context.Context, driverId model.DriverId, status model.Status) error
+}

@@ -16,25 +16,15 @@ import (
 	"github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache/entity"
 )
 
-type distanceFinder interface {
-	Distance(context.Context, []model.Coordinate) (float64, error)
-}
-
 type statusStore struct {
-	redis           *redisCache.Client
-	coordinateStore repository.CoordinateFinder
-	distanceFinder  distanceFinder
+	redis *redisCache.Client
 }
 
 func NewStatusStore(
 	redis *redisCache.Client,
-	coordinateStore repository.CoordinateFinder,
-	distanceFinder distanceFinder,
 ) *statusStore {
 	return &statusStore{
-		redis:           redis,
-		coordinateStore: coordinateStore,
-		distanceFinder:  distanceFinder,
+		redis: redis,
 	}
 }
 
@@ -49,44 +39,29 @@ func (s *statusStore) Find(ctx context.Context, driverId model.DriverId) (model.
 		return model.Status{}, err
 	}
 
-	if len(statusAsBytes) > 0 {
-		var status entity.Status
-		err = json.Unmarshal(statusAsBytes, &status)
-		if err != nil {
-			return model.Status{}, err
-		}
-
-		return statusEntityToModel(status), nil
+	if len(statusAsBytes) < 0 {
+		return model.Status{}, shared.NewDomainError(repository.ErrDriverIdNotFoundMessage)
 	}
 
-	coordinates, err := s.coordinateStore.Find(ctx, driverId)
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			return model.Status{}, err
-		}
-
-		return model.Status{}, err
-	}
-
-	distance, err := s.distanceFinder.Distance(ctx, coordinates)
+	var status entity.Status
+	err = json.Unmarshal(statusAsBytes, &status)
 	if err != nil {
 		return model.Status{}, err
 	}
 
-	status := model.NewStatus(false)
-	status.ComputeZombieStatus(distance)
+	return statusEntityToModel(status), nil
+}
 
-	entityStatus := statusModelToEntity(status)
-	entityStatusAsBytes, err := json.Marshal(entityStatus)
+func (s *statusStore) Persist(ctx context.Context, driverId model.DriverId, status model.Status) error {
+	driverKey := fmt.Sprintf("s:%s", driverId.Id())
+
+	statusEntity := statusModelToEntity(status)
+	statusAsBytes, err := json.Marshal(statusEntity)
 	if err != nil {
-		return model.Status{}, err
-	}
-	err = s.redis.Set(ctx, driverKey, entityStatusAsBytes, time.Duration(0))
-	if err != nil {
-		return model.Status{}, err
+		return err
 	}
 
-	return status, nil
+	return s.redis.Set(ctx, driverKey, statusAsBytes, time.Duration(0))
 }
 
 func statusEntityToModel(status entity.Status) model.Status {

@@ -48,10 +48,22 @@ func TestGetDriverZombieStatus(t *testing.T) {
 		t.Fatal("Error creating consumer")
 	}
 
+	distanceFinder := distance.NewDistanceFinder(
+		distance.Strategy(distance.HaversineFormula),
+		map[distance.Strategy]distance.StrategyExecutor{
+			distance.Strategy(distance.HaversineFormula): &distance.Haversine{},
+		},
+	)
+	statusStore := statusCache.NewStatusStore(redisClient)
+	statusSvc := statusService.NewService(statusStore, coordinateStore, distanceFinder)
+
 	go consumer.Consume(
 		ctx,
 		natsmsEvent.NewCoordinateHandler(
 			coordinateService.New(coordinateStore),
+			statusSvc,
+			coordinateStore,
+			distanceFinder,
 		).Handle,
 	)
 
@@ -65,22 +77,10 @@ func TestGetDriverZombieStatus(t *testing.T) {
 		t.Fatal("Error creating producer")
 	}
 
-	distanceFinder := distance.NewDistanceFinder(
-		distance.Strategy(distance.HaversineFormula),
-		map[distance.Strategy]distance.StrategyExecutor{
-			distance.Strategy(distance.HaversineFormula): &distance.Haversine{},
-		},
-	)
-	statusStore := statusCache.NewStatusStore(
-		redisClient,
-		coordinateStore,
-		distanceFinder,
-	)
-
 	cfg := config.Config(*integrationEnvConfig)
 	statusServer := httpStatusV1.NewStatusHttpServer(
 		&cfg,
-		statusService.New(statusStore),
+		statusSvc,
 		muteLogger,
 	)
 

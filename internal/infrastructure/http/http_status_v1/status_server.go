@@ -15,7 +15,7 @@ import (
 )
 
 type getStatusHandler interface {
-	Handle(ctx context.Context, query query.GetStatus) (model.Status, error)
+	HandleGetStatus(ctx context.Context, query query.GetStatus) (model.Status, error)
 }
 
 func NewStatusHttpServer(
@@ -41,7 +41,7 @@ func NewStatusHttpServer(
 		}
 
 		driverId := model.NewDriverId(id)
-		status, err := getStatusHandler.Handle(ctx, query.NewGetStatus(driverId))
+		status, err := getStatusHandler.HandleGetStatus(ctx, query.NewGetStatus(driverId))
 		if err != nil {
 			if shared.IsDomainError(err) {
 				http.Error(w, "driver_id does not exist", http.StatusBadRequest)
