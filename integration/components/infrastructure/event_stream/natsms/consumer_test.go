@@ -19,10 +19,10 @@ func TestCanConsumeMessagesFromEventStream(t *testing.T) {
 	muteLogger := test_shared.NewMockedSilentLogger(t)
 	integrationEnvConfig := test_shared.GetIntegrationConfig(t)
 
-	producer := MustConnectToNatsProducer(t, "consumer.test", "consumer.test.event")
+	producer := MustConnectToNatsProducer(t, "consumer", "consumer.test.event")
 	consumer, err := natsms.NewConsumer(
 		integrationEnvConfig.NatsBrokerList,
-		"consumer.test",
+		"consumer",
 		"consumer.test.event",
 		muteLogger,
 	)
@@ -71,7 +71,6 @@ func TestCanConsumeMessagesFromEventStream(t *testing.T) {
 			}
 		}
 
-		consumer.Stop()
 		producer.Close()
 	})
 }

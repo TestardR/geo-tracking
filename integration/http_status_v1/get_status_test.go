@@ -2,7 +2,9 @@ package http_status_v1
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,6 +24,7 @@ import (
 	coordinateCache "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
 	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/http/www"
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 	statusCache "github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache"
 )
@@ -29,7 +32,6 @@ import (
 func TestGetDriverZombieStatus(t *testing.T) {
 	ctx := context.Background()
 	redis := redis_cache.MustConnectToRedis(t)
-	logger := test_shared.NewMockedLogger(t)
 	muteLogger := test_shared.NewMockedSilentLogger(t)
 	integrationEnvConfig := test_shared.GetIntegrationConfig(t)
 
@@ -38,12 +40,12 @@ func TestGetDriverZombieStatus(t *testing.T) {
 
 	consumer, err := natsms.NewConsumer(
 		integrationEnvConfig.NatsBrokerList,
-		natsms.DriverCoordinateUpdatedStream,
-		natsms.DriverCoordinateUpdatedSubject,
-		logger,
+		"e2e",
+		"e2e.test.event",
+		muteLogger,
 	)
 	if err != nil {
-		logger.Error("Error creating consumer")
+		t.Fatal("Error creating consumer")
 	}
 
 	go consumer.Consume(
@@ -52,16 +54,15 @@ func TestGetDriverZombieStatus(t *testing.T) {
 			coordinateService.New(coordinateStore),
 		).Handle,
 	)
-	defer consumer.Stop()
 
 	producer, err := natsms.NewProducer(
 		integrationEnvConfig.NatsBrokerList,
-		natsms.DriverCoordinateUpdatedStream,
-		natsms.DriverCoordinateUpdatedSubject,
+		"e2e",
+		"e2e.test.event",
 		muteLogger,
 	)
 	if err != nil {
-		logger.Error("Error creating producer")
+		t.Fatal("Error creating producer")
 	}
 
 	distanceFinder := distance.NewDistanceFinder(
@@ -87,8 +88,6 @@ func TestGetDriverZombieStatus(t *testing.T) {
 
 	t.Cleanup(func() {
 		ts.Close()
-
-		defer consumer.Stop()
 
 		err := redis.Close()
 		if err != nil {
@@ -121,16 +120,23 @@ func TestGetDriverZombieStatus(t *testing.T) {
 		}
 		for _, msg := range messages {
 			err = producer.Publish(ctx, msg)
-			if err != nil {
-				t.Fatal(err)
-			}
+			g.Expect(err).To(gomega.BeNil())
 		}
 
-		resp, err := http.Get(fmt.Sprintf("%s/healthz", ts.URL))
-		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
-		}
+		resp, err := http.Get(fmt.Sprintf("%s/status?driver_id=123", ts.URL))
+		g.Expect(err).To(gomega.BeNil())
 
+		bodyBytes, err := io.ReadAll(resp.Body)
+		g.Expect(err).To(gomega.BeNil())
+
+		var status www.Status
+		json.Unmarshal(bodyBytes, &status)
+		g.Expect(err).To(gomega.BeNil())
+
+		g.Expect(status.DriverId).To(gomega.Equal("123"))
+		g.Expect(status.IsZombie).To(gomega.BeTrue())
 		g.Expect(resp.StatusCode).To(gomega.Equal(http.StatusOK))
+
+		producer.Close()
 	})
 }

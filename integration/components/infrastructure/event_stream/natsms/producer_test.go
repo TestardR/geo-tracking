@@ -13,7 +13,7 @@ import (
 func TestCanProduceMessagesToEventStream(t *testing.T) {
 	ctx := context.Background()
 
-	producer := MustConnectToNatsProducer(t, "producer.test", "producer.test.event")
+	producer := MustConnectToNatsProducer(t, "producer", "producer.test.event")
 
 	g := gomega.NewWithT(t)
 
