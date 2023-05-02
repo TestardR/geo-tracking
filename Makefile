@@ -38,3 +38,14 @@ vet:
 	@echo "Running vet ..."
 	@go vet ./...
 	@echo "Running vet, done!"
+
+infra-up:
+	@cd infrastructure && docker network create gt || true && docker-compose up -d
+
+infra-down:
+	@cd infrastructure && docker-compose down
+
+integration-test:
+	@echo "Running integration-tests ..."
+	@ginkgo -r -cover ./integration
+	@echo "Running tests, done!"
