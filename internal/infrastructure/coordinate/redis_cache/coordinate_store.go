@@ -52,7 +52,7 @@ func (s *coordinateStore) Persist(
 		return err
 	}
 
-	inTimeWindowCoordinates := make([]entity.Coordinate, len(coordinates), 0)
+	inTimeWindowCoordinates := make([]entity.Coordinate, 0, len(coordinates))
 	t := time.Now()
 	for _, c := range coordinates {
 		if t.Sub(c.CreatedAt).Minutes() < 5 {
