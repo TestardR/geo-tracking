@@ -7,8 +7,8 @@
 ### Geo-Tracking service
 
 The service has two main features:
-- compute a driver's status (isZombie) asynchronously consuming driver coordinate updated events,
-- serve a driver's status synchronously through HTTP GET requests
+- compute and stores driver's status (isZombie) asynchronously consuming driver coordinate updated events. As such, the service leverages reactive caching,
+- serve a driver's status synchronously through HTTP GET requests.
 
 This service has been built following several architecture paradigms:
 - [Hexagonal](https://alistair.cockburn.us/hexagonal-architecture/)
