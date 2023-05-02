@@ -66,5 +66,5 @@ Access pages locally, such as:
 
 Note: driver's coordinate and status are updated through events. 
 - Events can be easily produced running integration test ./integration/http_status_v1
-- You will need to have ginkgo testing framwework installed https://onsi.github.io/ginkgo/#installing-ginkgo
+- You will need to have ginkgo testing framework installed https://onsi.github.io/ginkgo/#installing-ginkgo
 
