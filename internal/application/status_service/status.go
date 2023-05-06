@@ -58,8 +58,7 @@ func (s *Service) HandleChangeStatus(ctx context.Context, cmd command.ChangeStat
 		return err
 	}
 
-	status := model.NewStatus(false)
-	status.ComputeZombieStatus(distance)
+	status := model.NewStatusFromDistance(distance)
 
 	err = s.statusStore.Persist(ctx, driverId, status)
 	if err != nil {

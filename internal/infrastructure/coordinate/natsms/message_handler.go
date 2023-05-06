@@ -78,8 +78,7 @@ func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
 		return err
 	}
 
-	status := model.NewStatus(false)
-	status.ComputeZombieStatus(distance)
+	status := model.NewStatusFromDistance(distance)
 
 	statusCmd := command.NewChangeStatus(driverId, status)
 	err = h.statusService.HandleChangeStatus(ctx, statusCmd)

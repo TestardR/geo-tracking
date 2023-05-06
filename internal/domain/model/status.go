@@ -8,24 +8,25 @@ type Status struct {
 	isZombie bool
 }
 
-func NewStatus(isZombie bool) Status {
-	return Status{isZombie: isZombie}
+func NewStatus() Status {
+	return Status{}
 }
 
 func (s *Status) Zombie() bool {
 	return s.isZombie
 }
 
-func (s *Status) ComputeZombieStatus(distance float64) bool {
+func NewStatusFromDistance(distance float64) Status {
+	isZombie := false
 	if distance <= 0.5 {
-		s.isZombie = true
+		isZombie = true
 	}
 
-	return s.isZombie
+	return Status{isZombie: isZombie}
 }
 
-func StatusToEntity(status Status) entity.Status {
-	return entity.Status{
-		IsZombie: status.Zombie(),
+func RecreateStatus(entity entity.Status) Status {
+	return Status{
+		isZombie: entity.IsZombie,
 	}
 }

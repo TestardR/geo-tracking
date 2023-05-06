@@ -49,7 +49,7 @@ func (s *statusStore) Find(ctx context.Context, driverId model.DriverId) (model.
 		return model.Status{}, err
 	}
 
-	return statusEntityToModel(status), nil
+	return model.RecreateStatus(status), nil
 }
 
 func (s *statusStore) Persist(ctx context.Context, driverId model.DriverId, status model.Status) error {
@@ -62,10 +62,6 @@ func (s *statusStore) Persist(ctx context.Context, driverId model.DriverId, stat
 	}
 
 	return s.redis.Set(ctx, driverKey, statusAsBytes, time.Duration(0))
-}
-
-func statusEntityToModel(status entity.Status) model.Status {
-	return model.NewStatus(status.IsZombie)
 }
 
 func statusModelToEntity(status model.Status) entity.Status {
