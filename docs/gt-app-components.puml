@@ -1,33 +1,35 @@
 @startuml
 'https://plantuml.com/component-diagram
 
-package "Infrastructure - HTTP" {
-   [HTTP GET Status] as http_get_status
+package "Infrastructure - HTTP" #EB937F {
+   [HTTP GET Status] as http_get_status 
 }
 
-package "Infrastructure - Event Stream" {
+package "Infrastructure - Event Stream" #EB937F {
    [driver-coordinate.udpated Event] as event_driver_coordinate
 }
 
-package "Application" {
-    http_get_status ---> [Status Service] : Read Driver's Status
-    event_driver_coordinate --> [Coordinate Service]: Change Driver's Coordinate
+package "Infrastructure - Distance" #EB937F {
+    [Distance Finder] as distance_finder 
 }
 
-package "Domain" {
+package "Application" #ADD1B2 {
+    http_get_status ---> [Status Service]: Get Driver's Status
+    event_driver_coordinate --> [Coordinate Service]: 1. Change Driver's Coordinate
+    event_driver_coordinate --> [Status Service]: 2. Change Driver's Status
+    distance_finder --> [Status Service]: 3. Compute Driver's Distance
+}
+
+package "Domain" #B4A7E5 {
     [Coordinate]
     [Status]
-    [Distance]
 
     [Status Service] --> [Status]
-    [Coordinate Service] --> [Coordinate]: 1. add driver's coordinate
-    [Coordinate Service] --> [Distance]: 2. compute driver's status
-
-    [Distance] --> [Status]
-    [Distance] --> [Coordinate]
+    
+    [Coordinate Service] --> [Coordinate]
 }
 
-package "Infrastructure - Persistence" {
+package "Infrastructure - Persistence" #EB937F {
      database "Redis" {
           folder "cache" {
             [status]
@@ -36,7 +38,6 @@ package "Infrastructure - Persistence" {
 }
 
 [Status] -- [status]
-
 [Coordinate] -- [coordinate]
 
 @enduml

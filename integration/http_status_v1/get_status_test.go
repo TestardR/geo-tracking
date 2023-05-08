@@ -18,13 +18,13 @@ import (
 	"github.com/TestardR/geo-tracking/integration/test_shared"
 	coordinateService "github.com/TestardR/geo-tracking/internal/application/coordinate_service"
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
-	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
+	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/api/http_status_v1"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/api/www"
 	natsmsEvent "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 	coordinateCache "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/distance"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
-	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/http/www"
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 	statusCache "github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache"
 )
@@ -63,7 +63,6 @@ func TestGetDriverZombieStatus(t *testing.T) {
 			coordinateService.New(coordinateStore),
 			statusSvc,
 			coordinateStore,
-			distanceFinder,
 		).Handle,
 	)
 

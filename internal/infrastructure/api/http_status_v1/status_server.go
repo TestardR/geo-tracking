@@ -11,7 +11,7 @@ import (
 	"github.com/TestardR/geo-tracking/internal/application/query"
 	"github.com/TestardR/geo-tracking/internal/domain/model"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
-	"github.com/TestardR/geo-tracking/internal/infrastructure/http/www"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/api/www"
 )
 
 type getStatusHandler interface {

@@ -13,12 +13,12 @@ import (
 	"github.com/TestardR/geo-tracking/config"
 	coordinateService "github.com/TestardR/geo-tracking/internal/application/coordinate_service"
 	statusService "github.com/TestardR/geo-tracking/internal/application/status_service"
-	"github.com/TestardR/geo-tracking/internal/domain/model/distance"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
+	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/api/http_status_v1"
 	natsmsEvent "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms"
 	coordinateCache "github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache"
+	"github.com/TestardR/geo-tracking/internal/infrastructure/distance"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/event_stream/natsms"
-	httpStatusV1 "github.com/TestardR/geo-tracking/internal/infrastructure/http/http_status_v1"
 	logger "github.com/TestardR/geo-tracking/internal/infrastructure/logging/zap_logger"
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 	statusCache "github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache"
@@ -78,7 +78,6 @@ func RunAsHTTPServer(
 			coordinateService.New(coordinateStore),
 			statusSvc,
 			coordinateStore,
-			distanceFinder,
 		).Handle,
 	)
 	defer consumer.Stop()

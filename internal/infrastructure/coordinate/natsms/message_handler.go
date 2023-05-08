@@ -12,10 +12,6 @@ import (
 	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 )
 
-type distanceFinder interface {
-	Distance(context.Context, []model.Coordinate) (float64, error)
-}
-
 type AddCoordinateHandler interface {
 	Handle(ctx context.Context, cmd command.AddCoordinate) error
 }
@@ -28,20 +24,17 @@ type coordinateHandler struct {
 	coordinateService AddCoordinateHandler
 	statusService     ChangeStatusHandler
 	coordinateStore   repository.CoordinateFinder
-	distanceFinder    distanceFinder
 }
 
 func NewCoordinateHandler(
 	coordinateService AddCoordinateHandler,
 	statusService ChangeStatusHandler,
 	coordinateStore repository.CoordinateFinder,
-	distanceFinder distanceFinder,
 ) *coordinateHandler {
 	return &coordinateHandler{
 		coordinateService: coordinateService,
 		statusService:     statusService,
 		coordinateStore:   coordinateStore,
-		distanceFinder:    distanceFinder,
 	}
 }
 
@@ -68,19 +61,7 @@ func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
 		return err
 	}
 
-	coordinates, err := h.coordinateStore.Find(ctx, driverId)
-	if err != nil {
-		return err
-	}
-
-	distance, err := h.distanceFinder.Distance(ctx, coordinates)
-	if err != nil {
-		return err
-	}
-
-	status := model.NewStatusFromDistance(distance)
-
-	statusCmd := command.NewChangeStatus(driverId, status)
+	statusCmd := command.NewChangeStatus(driverId)
 	err = h.statusService.HandleChangeStatus(ctx, statusCmd)
 	if err != nil {
 		return err

@@ -6,17 +6,12 @@ import (
 
 type ChangeStatus struct {
 	driverId model.DriverId
-	status   model.Status
 }
 
-func NewChangeStatus(id model.DriverId, status model.Status) ChangeStatus {
-	return ChangeStatus{driverId: id, status: status}
+func NewChangeStatus(id model.DriverId) ChangeStatus {
+	return ChangeStatus{driverId: id}
 }
 
 func (c ChangeStatus) DriverId() string {
 	return c.driverId.Id()
-}
-
-func (c ChangeStatus) Status() model.Status {
-	return c.status
 }
