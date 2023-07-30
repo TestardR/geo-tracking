@@ -8,6 +8,6 @@ func NewDriverId(id string) DriverId {
 	return DriverId{id: id}
 }
 
-func (i *DriverId) Id() string {
+func (i DriverId) Id() string {
 	return i.id
 }

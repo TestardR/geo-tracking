@@ -2,8 +2,8 @@ package distance
 
 import (
 	"context"
-
-	"github.com/TestardR/geo-tracking/internal/domain/model"
+	coordinateModel "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
+	distanceModel "github.com/TestardR/geo-tracking/internal/domain/distance"
 )
 
 const (
@@ -12,7 +12,7 @@ const (
 )
 
 type StrategyExecutor interface {
-	Distance(context.Context, []model.Coordinate) (float64, error)
+	Distance(context.Context, []coordinateModel.Coordinate) (distanceModel.Distance, error)
 }
 
 type Strategy string
@@ -29,6 +29,6 @@ func NewDistanceFinder(
 	return &distanceFinder{strategy: strategy, strategies: strategies}
 }
 
-func (d *distanceFinder) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
+func (d *distanceFinder) Distance(ctx context.Context, coordinates []coordinateModel.Coordinate) (distanceModel.Distance, error) {
 	return d.strategies[d.strategy].Distance(ctx, coordinates)
 }

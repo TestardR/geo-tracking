@@ -77,7 +77,7 @@ func TestGetDriverZombieStatus(t *testing.T) {
 	}
 
 	cfg := config.Config(*integrationEnvConfig)
-	statusServer := httpStatusV1.NewStatusHttpServer(
+	statusServer := httpStatusV1.NewHttpServer(
 		&cfg,
 		statusSvc,
 		muteLogger,
@@ -87,6 +87,7 @@ func TestGetDriverZombieStatus(t *testing.T) {
 
 	t.Cleanup(func() {
 		ts.Close()
+		producer.Close()
 
 		err := redis.Close()
 		if err != nil {
@@ -116,6 +117,12 @@ func TestGetDriverZombieStatus(t *testing.T) {
 				Latitude:  2.364462,
 				CreatedAt: time.Now().UTC(),
 			},
+			{
+				DriverId:  "123",
+				Longitude: 48.907219,
+				Latitude:  2.364464,
+				CreatedAt: time.Now().UTC(),
+			},
 		}
 		for _, msg := range messages {
 			err = producer.Publish(ctx, msg)
@@ -136,6 +143,5 @@ func TestGetDriverZombieStatus(t *testing.T) {
 		g.Expect(status.IsZombie).To(gomega.BeTrue())
 		g.Expect(resp.StatusCode).To(gomega.Equal(http.StatusOK))
 
-		producer.Close()
 	})
 }

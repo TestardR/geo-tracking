@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	driverModel "github.com/TestardR/geo-tracking/internal/domain/driver/model"
+	"github.com/TestardR/geo-tracking/internal/domain/status/model"
 	"net/http"
 	"time"
 
 	"github.com/TestardR/geo-tracking/config"
 	"github.com/TestardR/geo-tracking/internal/application/query"
-	"github.com/TestardR/geo-tracking/internal/domain/model"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/api/www"
 )
@@ -18,7 +19,7 @@ type getStatusHandler interface {
 	HandleGetStatus(ctx context.Context, query query.GetStatus) (model.Status, error)
 }
 
-func NewStatusHttpServer(
+func NewHttpServer(
 	cfg *config.Config,
 	getStatusHandler getStatusHandler,
 	logger shared.ErrorLogger,
@@ -40,7 +41,7 @@ func NewStatusHttpServer(
 			return
 		}
 
-		driverId := model.NewDriverId(id)
+		driverId := driverModel.NewDriverId(id)
 		status, err := getStatusHandler.HandleGetStatus(ctx, query.NewGetStatus(driverId))
 		if err != nil {
 			if shared.IsDomainError(err) {
@@ -75,5 +76,4 @@ func NewStatusHttpServer(
 		WriteTimeout: 10 * time.Second,
 		Handler:      mux,
 	}
-
 }

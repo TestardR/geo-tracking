@@ -3,17 +3,17 @@ package natsms
 import (
 	"context"
 	"encoding/json"
-
+	coordinateModel "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
+	coordinateRepository "github.com/TestardR/geo-tracking/internal/domain/coordinate/repository"
+	"github.com/TestardR/geo-tracking/internal/domain/driver/model"
 	"github.com/nats-io/nats.go"
 
 	"github.com/TestardR/geo-tracking/internal/application/command"
-	"github.com/TestardR/geo-tracking/internal/domain/model"
-	"github.com/TestardR/geo-tracking/internal/domain/repository"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/natsms/entity"
 )
 
 type AddCoordinateHandler interface {
-	Handle(ctx context.Context, cmd command.AddCoordinate) error
+	Handle(ctx context.Context, cmd command.ChangeCoordinate) error
 }
 
 type ChangeStatusHandler interface {
@@ -23,13 +23,13 @@ type ChangeStatusHandler interface {
 type coordinateHandler struct {
 	coordinateService AddCoordinateHandler
 	statusService     ChangeStatusHandler
-	coordinateStore   repository.CoordinateFinder
+	coordinateStore   coordinateRepository.CoordinateFinder
 }
 
 func NewCoordinateHandler(
 	coordinateService AddCoordinateHandler,
 	statusService ChangeStatusHandler,
-	coordinateStore repository.CoordinateFinder,
+	coordinateStore coordinateRepository.CoordinateFinder,
 ) *coordinateHandler {
 	return &coordinateHandler{
 		coordinateService: coordinateService,
@@ -46,16 +46,13 @@ func (h *coordinateHandler) Handle(ctx context.Context, msg *nats.Msg) error {
 	}
 
 	driverId := model.NewDriverId(driverCoordinate.DriverId)
-	coordinate, err := model.NewCoordinate(
+	coordinate := coordinateModel.NewCoordinate(
 		driverCoordinate.Longitude,
 		driverCoordinate.Latitude,
 		driverCoordinate.CreatedAt,
 	)
-	if err != nil {
-		return err
-	}
 
-	cmd := command.NewAddCoordinate(driverId, coordinate)
+	cmd := command.NewChangeCoordinate(driverId, coordinate)
 	err = h.coordinateService.Handle(ctx, cmd)
 	if err != nil {
 		return err

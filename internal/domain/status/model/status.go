@@ -1,6 +1,7 @@
 package model
 
 import (
+	distanceModel "github.com/TestardR/geo-tracking/internal/domain/distance"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache/entity"
 )
 
@@ -16,9 +17,9 @@ func (s *Status) Zombie() bool {
 	return s.isZombie
 }
 
-func NewStatusFromDistance(distance float64) Status {
+func NewStatusFromDistance(distance distanceModel.Distance) Status {
 	isZombie := false
-	if distance <= 0.5 {
+	if distance.Kilometers() <= 0.5 {
 		isZombie = true
 	}
 

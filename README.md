@@ -42,6 +42,12 @@ For the sake of time, critical aspects are covered by unit tests and integration
 
 ### Start infrastructure - services used by GT
 
+Install dependencies by running:
+
+```bash
+$ make deps
+```
+
 Start the infrastructure by running:
 
 ```bash
@@ -53,11 +59,16 @@ Stop the infrastructure by running:
 $ make infra-down
 ```
 
+Run integration tests (you will need ginkgo test runner installed):
+```bash
+$ make integration-test
+```
+
 ### Start services in dev mode
 
 ```bash
 $ make build
-$ ./build/pim s
+$ ./build/geo-tracking s
 ```
 
 Access pages locally, such as:

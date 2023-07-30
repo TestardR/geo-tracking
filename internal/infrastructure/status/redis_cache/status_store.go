@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	driverModel "github.com/TestardR/geo-tracking/internal/domain/driver/model"
+	"github.com/TestardR/geo-tracking/internal/domain/driver/repository"
+	"github.com/TestardR/geo-tracking/internal/domain/status/model"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/TestardR/geo-tracking/internal/domain/model"
-	"github.com/TestardR/geo-tracking/internal/domain/repository"
 	"github.com/TestardR/geo-tracking/internal/domain/shared"
 	redisCache "github.com/TestardR/geo-tracking/internal/infrastructure/shared/redis_cache"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/status/redis_cache/entity"
@@ -28,7 +29,7 @@ func NewStatusStore(
 	}
 }
 
-func (s *statusStore) Find(ctx context.Context, driverId model.DriverId) (model.Status, error) {
+func (s *statusStore) Find(ctx context.Context, driverId driverModel.DriverId) (model.Status, error) {
 	driverKey := fmt.Sprintf("s:%s", driverId.Id())
 	statusAsBytes, err := s.redis.Get(ctx, driverKey)
 	if err != nil {
@@ -52,7 +53,7 @@ func (s *statusStore) Find(ctx context.Context, driverId model.DriverId) (model.
 	return model.RecreateStatus(status), nil
 }
 
-func (s *statusStore) Persist(ctx context.Context, driverId model.DriverId, status model.Status) error {
+func (s *statusStore) Persist(ctx context.Context, driverId driverModel.DriverId, status model.Status) error {
 	driverKey := fmt.Sprintf("s:%s", driverId.Id())
 
 	statusEntity := statusModelToEntity(status)
