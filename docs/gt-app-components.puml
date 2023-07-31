@@ -27,6 +27,7 @@ package "Domain" #B4A7E5 {
 
     [Status Service] --> [Status]
     [Status Service] --> [Distance]
+    [Status Service] --> [Coordinate]
     
     [Coordinate Service] --> [Coordinate]
 }
