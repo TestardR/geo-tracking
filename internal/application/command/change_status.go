@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/TestardR/geo-tracking/internal/domain/model"
+	"github.com/TestardR/geo-tracking/internal/domain/driver/model"
 )
 
 type ChangeStatus struct {

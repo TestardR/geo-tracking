@@ -3,18 +3,17 @@ package distance
 import (
 	"context"
 	"errors"
-
+	coordinateModel "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
+	distanceModel "github.com/TestardR/geo-tracking/internal/domain/distance"
 	"github.com/jftuga/geodist"
-
-	"github.com/TestardR/geo-tracking/internal/domain/model"
 )
 
 // Haversine computes distance in kilometers between coordinates using Haversine formula
 type Haversine struct{}
 
-func (d *Haversine) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
+func (d *Haversine) Distance(ctx context.Context, coordinates []coordinateModel.Coordinate) (distanceModel.Distance, error) {
 	if len(coordinates) < 2 {
-		return 0, errors.New("coordinates length must be > 1")
+		return distanceModel.Distance{}, errors.New("coordinates length must be > 1")
 	}
 
 	distance := float64(0)
@@ -26,5 +25,5 @@ func (d *Haversine) Distance(ctx context.Context, coordinates []model.Coordinate
 		distance += km
 	}
 
-	return distance, nil
+	return distanceModel.NewDistance(distance), nil
 }

@@ -14,17 +14,19 @@ package "Infrastructure - Distance" #EB937F {
 }
 
 package "Application" #ADD1B2 {
-    http_get_status ---> [Status Service]: Get Driver's Status
-    event_driver_coordinate --> [Coordinate Service]: 1. Change Driver's Coordinate
-    event_driver_coordinate --> [Status Service]: 2. Change Driver's Status
-    distance_finder --> [Status Service]: 3. Compute Driver's Distance
+    http_get_status ---> [Status Service]: Get a driver zombie's status
+    event_driver_coordinate --> [Coordinate Service]: 1. Change a driver's coordinate
+    [Coordinate Service] --> [Status Service]: 2. Trigger a driver's status computation from coordinates
+    distance_finder --> [Status Service]: 3. Compute a driver's distance
 }
 
 package "Domain" #B4A7E5 {
     [Coordinate]
     [Status]
+    [Distance]
 
     [Status Service] --> [Status]
+    [Status Service] --> [Distance]
     
     [Coordinate Service] --> [Coordinate]
 }

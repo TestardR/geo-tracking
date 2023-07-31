@@ -82,7 +82,7 @@ func RunAsHTTPServer(
 	)
 	defer consumer.Stop()
 
-	statusServer := httpStatusV1.NewStatusHttpServer(
+	statusServer := httpStatusV1.NewHttpServer(
 		cfg,
 		statusSvc,
 		zapSugaredLogger,
@@ -90,7 +90,7 @@ func RunAsHTTPServer(
 	go func() {
 		consoleOutput.Printf("Starting HTTP Server")
 		err := statusServer.ListenAndServe()
-		if nil != err && err != http.ErrServerClosed {
+		if err != nil && err != http.ErrServerClosed {
 			consoleOutput.Printf("Server stopped due to the error: %s", err.Error())
 		}
 	}()

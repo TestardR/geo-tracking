@@ -3,18 +3,17 @@ package distance
 import (
 	"context"
 	"errors"
-
+	coordinateModel "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
+	distanceModel "github.com/TestardR/geo-tracking/internal/domain/distance"
 	"github.com/jftuga/geodist"
-
-	"github.com/TestardR/geo-tracking/internal/domain/model"
 )
 
 // Vincenty computes distance in kilometers between coordinates using Vincenty formula
 type Vincenty struct{}
 
-func (d *Vincenty) Distance(ctx context.Context, coordinates []model.Coordinate) (float64, error) {
+func (d *Vincenty) Distance(ctx context.Context, coordinates []coordinateModel.Coordinate) (distanceModel.Distance, error) {
 	if len(coordinates) < 2 {
-		return 0, errors.New("coordinates length must be > 1")
+		return distanceModel.Distance{}, errors.New("coordinates length must be > 1")
 	}
 
 	distance := float64(0)
@@ -24,10 +23,10 @@ func (d *Vincenty) Distance(ctx context.Context, coordinates []model.Coordinate)
 
 		_, km, err := geodist.VincentyDistance(p1, p2)
 		if err != nil {
-			return 0, err
+			return distanceModel.Distance{}, err
 		}
 		distance += km
 	}
 
-	return distance, nil
+	return distanceModel.NewDistance(distance), nil
 }

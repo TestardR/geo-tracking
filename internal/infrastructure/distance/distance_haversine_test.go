@@ -2,12 +2,12 @@ package distance
 
 import (
 	"context"
+	coordinateModel "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
 	"testing"
 	"time"
 
 	"github.com/bsm/gomega"
 
-	"github.com/TestardR/geo-tracking/internal/domain/model"
 	"github.com/TestardR/geo-tracking/internal/infrastructure/coordinate/redis_cache/entity"
 )
 
@@ -23,13 +23,13 @@ func TestCanComputeDistanceWithHaversineFormula(t *testing.T) {
 			{Longitude: 48.907214, Latitude: 2.364462},
 		}
 
-		var coordinatesModel []model.Coordinate
+		var coordinatesModel []coordinateModel.Coordinate
 		for _, coordinate := range coordinates {
-			coordinatesModel = append(coordinatesModel, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude, time.Now()))
+			coordinatesModel = append(coordinatesModel, coordinateModel.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude, time.Now()))
 		}
 
 		result, _ := distance.Distance(context.Background(), coordinatesModel)
-		g.Expect(result).To(gomega.Equal(0.2932422813613985))
+		g.Expect(result.Kilometers()).To(gomega.Equal(0.2932422813613985))
 	})
 
 	t.Run("can compute coordinates with even values", func(t *testing.T) {
@@ -40,12 +40,12 @@ func TestCanComputeDistanceWithHaversineFormula(t *testing.T) {
 			{Longitude: 48.906223, Latitude: 2.364355},
 		}
 
-		var coordinatesModel []model.Coordinate
+		var coordinatesModel []coordinateModel.Coordinate
 		for _, coordinate := range coordinates {
-			coordinatesModel = append(coordinatesModel, model.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude, time.Now()))
+			coordinatesModel = append(coordinatesModel, coordinateModel.RecreateCoordinate(coordinate.Longitude, coordinate.Latitude, time.Now()))
 		}
 
 		result, _ := distance.Distance(context.Background(), coordinatesModel)
-		g.Expect(result).To(gomega.Equal(0.4041070503476985))
+		g.Expect(result.Kilometers()).To(gomega.Equal(0.4041070503476985))
 	})
 }

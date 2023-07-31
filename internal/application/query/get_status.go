@@ -1,7 +1,7 @@
 package query
 
 import (
-	"github.com/TestardR/geo-tracking/internal/domain/model"
+	"github.com/TestardR/geo-tracking/internal/domain/driver/model"
 )
 
 type GetStatus struct {

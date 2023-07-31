@@ -1,7 +1,6 @@
 package model
 
 import (
-	"errors"
 	"time"
 )
 
@@ -15,16 +14,12 @@ func NewCoordinate(
 	longitude float64,
 	latitude float64,
 	createdAt time.Time,
-) (Coordinate, error) {
-	if longitude < 0 || latitude < 0 {
-		return Coordinate{}, errors.New("longitude or latitude cannot be negative")
-	}
-
+) Coordinate {
 	return Coordinate{
 		longitude: longitude,
 		latitude:  latitude,
 		createdAt: createdAt,
-	}, nil
+	}
 }
 
 func (c *Coordinate) Longitude() float64 {
