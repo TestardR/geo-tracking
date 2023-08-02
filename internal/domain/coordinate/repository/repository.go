@@ -2,14 +2,14 @@ package repository
 
 import (
 	"context"
-	coordinateRepository "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
+	coordinateModel "github.com/TestardR/geo-tracking/internal/domain/coordinate/model"
 	"github.com/TestardR/geo-tracking/internal/domain/driver/model"
 )
 
 type CoordinatePersister interface {
-	Persist(ctx context.Context, addCoordinateChange coordinateRepository.AddCoordinateChange) error
+	Persist(ctx context.Context, addCoordinateChange coordinateModel.AddCoordinateChange) error
 }
 
 type CoordinateFinder interface {
-	Find(ctx context.Context, driverId model.DriverId) ([]coordinateRepository.Coordinate, error)
+	Find(ctx context.Context, driverId model.DriverId) ([]coordinateModel.Coordinate, error)
 }
